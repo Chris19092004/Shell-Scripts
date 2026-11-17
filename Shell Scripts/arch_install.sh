@@ -1,6 +1,7 @@
 #!/bin/bash
-set -euo pipefail
+set -euo pipefail # Adiciona camadas de segurança caso ocorra algum erro.
 
+# Define o disco em que o SO será instalado
 DISK="${1:-/dev/sda}"
 
 if [[ "$DISK" =~ [0-9]$ ]]; then
@@ -9,7 +10,7 @@ else
 	PART_PREFIX="$DISK"
 fi
 
-# Create partitions (boot, swap and root in btrfs)
+# Limpa todo o disco e cria as partições (boot, swap e root)
 wipefs -af "$DISK"
 sgdisk --zap-all "$DISK"
 
@@ -20,12 +21,12 @@ sgdisk -n 3:0:0 -t 3:8300 -c 3:"ROOT" "$DISK"
 partprobe "$DISK"
 sleep 1
 
-# Format the partitions
+# Formata as partições de acordo com cada filesystem
 mkfs.fat -F 32 "${PART_PREFIX}1"
 mkswap "${PART_PREFIX}2"
 mkfs.btrfs -f -L archbtrfs "${PART_PREFIX}3"
 
-# Subvolumes for btrfs
+# Subvolumes para Btrfs
 mount "${PART_PREFIX}3" /mnt
 btrfs subvolume create /mnt/@
 btrfs subvolume create /mnt/@home
@@ -41,14 +42,14 @@ mount -o noatime,compress=zstd,space_cache=v2,subvol=@var_log "${PART_PREFIX}3" 
 mount -o noatime,compress=zstd,space_cache=v2,subvol=@pkg "${PART_PREFIX}3" /mnt/var/cache/pacman/pkg
 mount -o noatime,compress=zstd,space_cache=v2,subvol=@.snapshots "${PART_PREFIX}3" /mnt/.snapshots
 
-# Mount the file systems
-mount --mkdir "${PART_PREFIX}1" /mnt/boot
+# Monta os filesystems
+mount --mkdir "${PART_PREFIX}1" /mnt/efi
 swapon "${PART_PREFIX}2"
 
-# Install the most basic packages
+# Instala pacotes básicos
 pacstrap -K /mnt base linux linux-firmware sudo networkmanager grub efibootmgr btrfs-progs snap-pac grub-btrfs snapper inotify-tools nano vim
 
-# Configure the system (fstab, chroot, time, localization, etc.)
+# Configura o sistema (fstab, chroot, tempo, localização, internet, bootloader, etc.)
 genfstab -U /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt /bin/bash <<EOF
@@ -68,7 +69,7 @@ echo "arch" > /etc/hostname
 mkinitcpio -P
 
 # Grub (bootloader)
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable
+grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB --removable
 
 grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -76,7 +77,9 @@ grub-mkconfig -o /boot/grub/grub.cfg
 systemctl enable NetworkManager.service
 EOF
 
+# Define a senha do root
 echo "Digite a senha de root para o novo sistema:"
 arch-chroot /mnt passwd
 
+# Conclusão do Script
 echo "Instalação concluída! Execute 'umount -R /mnt' e reinicie."

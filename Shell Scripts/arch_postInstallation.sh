@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+# Cria usuário comum e concede permissões de root com sudo para ele
 TARGET_USER="chris"
 
 echo "Criando usuário..."
@@ -8,33 +9,33 @@ useradd -m -G wheel -s /bin/bash "$TARGET_USER"
 sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 passwd "$TARGET_USER"
 
-# Temporary passwordless sudo so makepkg and yay don't hang asking for a password
+# Garante que a regra temporária seguinte seja removida mesmo se o script falhar
+trap 'rm -f /etc/sudoers.d/99-temp-installer' EXIT
+
+# Temporariamente elimina a necessidade de senha (necessário para que o script não pare com makepkg e yay peçam senha)
 echo "$TARGET_USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/99-temp-installer
 
-# Packes installation - Pacman
-sudo pacman -S --needed --noconfirm base-devel bashtop clang cmake curl distrobox docker docker-buildx docker-compose dotnet-sdk flatpak gdb git jdk-openjdk kitty lazydocker lazygit libreoffice-fresh mariadb maven ncdu neovim ninja nodejs npm otf-monaspace-nerd plasma-desktop plasma-nm plasma-pa python python-pip python-pipx qutebrowser ranger rofi sddm sddm-kcm swaybg tmux tree-sitter-cli ufw waybar zsh
+# Instalação de pacotes com o Pacman, ignorando o que já estiver atualizado e ignorando necessidade de senha
+sudo pacman -S --needed --noconfirm base-devel bashtop clang cmake curl dbeaver distrobox docker docker-buildx docker-compose dotnet-sdk fastfetch flatpak gdb git github-cli jdk-openjdk kitty lazydocker lazygit libreoffice-fresh mariadb maven mc ncdu neovim ninja nodejs npm otf-monaspace-nerd plasma-desktop plasma-nm plasma-pa python python-pip python-pipx qutebrowser ranger rofi sddm sddm-kcm swaybg tmux tree-sitter-cli ufw waybar zsh
 
 echo "Configurando Snapper e snapshots Btrfs..."
 
-# 1. Unmount your existing @.snapshots subvolume if mounted
+# Desmonta subvolume @.snapshots existente se estiver montado
 if mountpoint -q /.snapshots; then
     umount /.snapshots
 fi
 rm -rf /.snapshots
 
-# 2. Create Snapper config (this creates a new nested /.snapshots subvolume)
+# Cria configuração do Snapper (para permitir rollbacks)
 snapper -c root create-config /
-
-# 3. Delete Snapper's nested subvolume and remount your @.snapshots subvolume
 btrfs subvolume delete /.snapshots
 mkdir -p /.snapshots
 mount -a
 
-# 4. Set permissions so your wheel user can inspect snapshots without sudo
+# Define permissões para gerenciamento de snapshots
 chmod 750 /.snapshots
 chown :wheel /.snapshots
 
-# 5. Set retention limits and allow wheel group access
 snapper -c root set-config \
     "ALLOW_GROUPS=wheel" \
     "SYNC_ACL=yes" \
@@ -44,11 +45,12 @@ snapper -c root set-config \
     "TIMELINE_LIMIT_MONTHLY=0" \
     "TIMELINE_LIMIT_YEARLY=0"
 
-# 6. Enable automatic timeline and cleanup timers
+# Habilita serviços essenciais para o Snapper e rollbacks funcionarem
 systemctl enable --now snapper-timeline.timer
 systemctl enable --now snapper-cleanup.timer
+systemctl enable --now grub-btrfsd
 
-# Enable AUR and yay
+# Habilita AUR (Arch User Repository) e Yay (um AUR Helper para facilitar instalação de pacotes)
 echo "Instalando yay..."
 
 su - "$TARGET_USER" -c '
@@ -59,17 +61,22 @@ su - "$TARGET_USER" -c '
 
 rm -rf /tmp/yay
 
-# Enable and configure firewall
+# Habilita e configura firewall
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw enable
 sudo systemctl enable ufw
 
-# Enable docker
+# Habilita MariaDB
+sudo mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+sudo systemctl start mariadb.service
+sudo systemctl enable mariadb.service
+
+# Habilita Docker e coloca o usuário com permissões de root para administrá-lo
 systemctl enable --now docker.service
 usermod -aG docker "$TARGET_USER"
 
-# Lazyvim
+# Transforma o Neovim em uma IDE (Lazyvim)
 echo "Instalando LazyVim..."
 su - "$TARGET_USER" -c '
     mkdir -p ~/.config &&
@@ -77,16 +84,19 @@ su - "$TARGET_USER" -c '
     rm -rf ~/.config/nvim/.git
 '
 
+# Instala o gerenciador de pacotes Nix
 echo "Instalando Nix..."
 curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon --no-confirm
 
+# Instala pacotes AUR
 echo "Instalando pacotes AUR..."
 su - "$TARGET_USER" -c "yay -S --noconfirm swayfx swaylock-effects waypaper"
 
-# Remove temporary passwordless sudo rule
+# Remove a regra temporária que ignora necessidade de senha
 rm -f /etc/sudoers.d/99-temp-installer
 
-echo "Habilitando SDDM..."
+# Habilitando SDDM (Gerenciador de Login padrão do KDE Plasma)
 systemctl enable sddm
 
+# Conclusão do Script
 echo "Concluído! Reinicie o sistema com 'reboot' para iniciar o SDDM."
