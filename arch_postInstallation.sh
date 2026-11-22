@@ -16,7 +16,7 @@ trap 'rm -f /etc/sudoers.d/99-temp-installer' EXIT
 echo "$TARGET_USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/99-temp-installer
 
 # Instalação de pacotes com o Pacman, ignorando o que já estiver atualizado e ignorando necessidade de senha
-sudo pacman -S --needed --noconfirm base-devel btop chromium clang cmake curl dbeaver distrobox docker docker-buildx docker-compose dolphin dotnet-sdk dux-shell emacs eza fastfetch feh flatpak gamemode gcc gimp git github-cli grim jdk-openjdk kdenlive kitty lazydocker lazygit libreoffice-fresh ly mariadb matugen maven mc mesa ncdu neovim ninja nodejs nerd-fonts npm obs-studio pipewire pipewire-alsa pipewire-jack pipewire-pulse plasma-desktop python python-adblock python-pip python-pipx retroarch rofi shellcheck slurp swaybg swayidle swaync swayimg tmux tree-sitter-cli ufw virtualbox virtualbox-host-dkms waybar wireplumber wl-clipboard xdg-user-dirs yazi zsh
+sudo pacman -S --needed --noconfirm base-devel btop clang cmake curl dbeaver distrobox docker docker-buildx docker-compose dolphin dotnet-sdk dux-shell emacs eza fastfetch feh flatpak gamemode gcc gimp git github-cli grim jdk-openjdk kdenlive kitty lazydocker lazygit libreoffice-fresh ly mariadb matugen maven mc mesa ncdu neovim ninja nodejs nerd-fonts npm obs-studio pipewire pipewire-alsa pipewire-jack pipewire-pulse plasma-desktop python python-adblock python-pip python-pipx retroarch rofi shellcheck slurp swaybg swayidle swaync swayimg tmux tree-sitter-cli ufw virtualbox virtualbox-host-dkms vivaldi waybar wireplumber wl-clipboard xdg-user-dirs yazi zsh
 
 echo "Configurando Snapper e snapshots Btrfs..."
 
