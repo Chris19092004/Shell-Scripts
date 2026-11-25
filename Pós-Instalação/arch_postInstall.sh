@@ -16,7 +16,7 @@ trap 'rm -f /etc/sudoers.d/99-temp-installer' EXIT
 echo "$TARGET_USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/99-temp-installer
 
 # Instalação de pacotes com o Pacman, ignorando o que já estiver atualizado e ignorando necessidade de senha
-sudo pacman -S --needed --noconfirm base-devel btop clang cmake curl dbeaver distrobox docker docker-buildx docker-compose dolphin dotnet-sdk dux-shell emacs eza fastfetch feh flatpak gamemode gcc gimp git github-cli grim jdk-openjdk kdenlive kitty lazydocker lazygit libreoffice-fresh ly mariadb matugen maven mc mesa ncdu neovim ninja nodejs nerd-fonts npm obs-studio pipewire pipewire-alsa pipewire-jack pipewire-pulse plasma-desktop python python-adblock python-pip python-pipx retroarch rofi shellcheck slurp swaybg swayidle swaync swayimg tmux tree-sitter-cli ufw virtualbox virtualbox-host-dkms vivaldi waybar wireplumber wl-clipboard xdg-user-dirs yazi zsh
+sudo pacman -S --needed --noconfirm 7zip base-devel btop clang cmake curl dbeaver distrobox docker docker-buildx docker-compose dolphin dotnet-sdk dux-shell emacs eza fastfetch feh flameshot flatpak gamemode gcc gimp git github-cli grim jdk-openjdk kdenlive kitty lazydocker lazygit libreoffice-fresh ly mariadb maven mc mesa ncdu neovim ninja noctalia nodejs nerd-fonts npm obs-studio pipewire pipewire-alsa pipewire-jack pipewire-pulse plasma-desktop python python-adblock python-pip python-pipx retroarch shellcheck slurp tmux tree-sitter-cli ufw virtualbox virtualbox-host-dkms vivaldi wine wireplumber wl-clipboard xdg-desktop-portal-hyprland xdg-user-dirs yazi zsh
 
 echo "Configurando Snapper e snapshots Btrfs..."
 
@@ -90,10 +90,10 @@ curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --da
 
 # Instala pacotes AUR
 echo "Instalando pacotes AUR..."
-su - "$TARGET_USER" -c "yay -S --noconfirm bat-cat-git oh-my-bash-git oh-my-zsh-git swayfx swaylock-effects waypaper mpvpaper visual-studio-code-bin wget2"
+su - "$TARGET_USER" -c "yay -S --noconfirm bat-cat-git oh-my-bash-git oh-my-zsh-git mpvpaper visual-studio-code-bin wget2"
 
 # Instalar pacotes Flatpak
-flatpak install -y flathub com.valvesoftware.Steam net.davidotek.pupgui2 org.openmw.OpenMW net.pcsx2.PCSX2 org.DolphinEmu.dolphin-emu app.xemu.xemu
+flatpak install -y flathub com.valvesoftware.Steam net.davidotek.pupgui2 org.openmw.OpenMW net.pcsx2.PCSX2 org.DolphinEmu.dolphin-emu app.xemu.xemu app.zen_browser.zen
 
 # Cria pastas na home
 su "$TARGET_USER" -c "xdg-user-dirs-update"
