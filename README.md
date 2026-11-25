@@ -13,13 +13,9 @@
 
 - [Sobre o repositório](#-sobre-o-repositório)
 - [Por que aprender Shell Script?](#-por-que-aprender-shell-script)
-- [Scripts disponíveis](#-scripts-disponíveis)
 - [Detalhes dos scripts](#-detalhes-dos-scripts)
-- [Como usar](#-como-usar)
 - [Avisos importantes](#-avisos-importantes)
 - [Convenções](#-convenções)
-- [Roadmap](#-roadmap)
-- [Recursos para estudar](#-recursos-para-estudar)
 
 ---
 
@@ -81,9 +77,9 @@ Os scripts refletem o meu setup. Antes de usar, revise e ajuste:
 - **O `arch_install.sh` apaga TODO o conteúdo do disco indicado.** Confira o disco com `lsblk` antes de executar.
 - Os scripts foram feitos para **UEFI**. Não funcionam em instalações BIOS/MBR.
 - Estão ajustados para o meu uso (fuso `America/Sao_Paulo`, teclado `br-abnt2`, pacotes escolhidos por mim). **Leia e adapte antes de rodar.**
-- Os dois scripts são **parcialmente interativos**: pedem a senha de root e a do usuário.
-- O `arch_postInstallation.sh` assume o layout criado pelo `arch_install.sh`. Em outra instalação, a parte do Snapper pode não funcionar.
-- O script de pós-instalação baixa e executa o instalador do Nix direto da internet (`curl | sh`). Revise se isso não for aceitável para você.
+- Os scripts de instalação e pós-instalação são **parcialmente interativos**: pedem a senha de root e a do usuário.
+- Scripts de pós-instalação (como o `arch_postInstallation.sh`) assumem o layout criado pelos respectivos scripts de instalação (`arch_install.sh`).
+- Scripts de pós-instalação baixam e executam o instalador do Nix direto da internet (`curl | sh`). Revise se isso não for aceitável para você.
 - **Teste primeiro em uma máquina virtual** (QEMU, VirtualBox, etc.) antes de rodar em hardware real.
 - **RODE POR SUA CONTA E RISCO!**
 
