@@ -2,15 +2,15 @@
 
 set -euo pipefail
 
-# Cria a variável $DIRETORIO, que se não for definida, receberá como valor o diretório ~/Downloads
-# O diretório a ser organizado pode ser alterada na hora da execução com o comando abaixo:
+# Cria a variável $DIRETORIO, que se não for definida, receberá como valor o meu diretório de Downloads na minha home.
+# O diretório a ser organizado pode ser alterado na hora da execução com o comando abaixo:
 # ./organizacao_arquivos.sh [diretório desejado]
 DIRETORIO="${1:-/home/chris/Downloads}"
 
-# Muda para o diretório definido em $DIRETORIO
+# Muda para o diretório definido em $DIRETORIO.
 cd "$DIRETORIO"
 
-# Declara os diretórios para onde os arquivos serão movidos em um array e atribui a cada elemento o diretório de destino
+# Declara os diretórios para onde os arquivos serão movidos em um array.
 declare -A pastas=(
 	[imagens]="$HOME/Pictures/Imagens"
 	[pngs]="$HOME/Pictures/PNGs"
@@ -30,20 +30,21 @@ declare -A pastas=(
 	[java]="$HOME/Projects/Coding/Java"
 )
 
-# Efetivamente cria os diretórios, usando o laço for que percorre cada elemento do array
+# Efetivamente cria os diretórios, usando o laço for que percorre cada elemento do array.
 for destino in "${pastas[@]}"; do
 	mkdir -p "${destino/#\~/$DIRETORIO}"
 done
 
-# Muda temporáriamente o comportamento do asterisco (*), para evitar conflitos em casos de diretórios vazios, por exemplo
+# Muda temporáriamente o comportamento do asterisco (*), para evitar conflitos em casos de diretórios vazios, por exemplo.
 shopt -s nullglob
 
 # Laço for que percorre TODOS os arquivos dentro do diretório definido em $DIRETORIO;
-# Ele verifica se o arquivo atual é de fato um arquivo (e não um diretório, por exemplo "~/Arquivos.txt/") antes de continuar
+# Ele verifica se o arquivo atual é de fato um arquivo (e não um diretório, por exemplo "~/Arquivos.txt/") antes de continuar.
 for arquivo in "$DIRETORIO"/*; do
 	[[ -f "$arquivo" ]] || continue
 
-	# Atribui cada extensão de arquivo a um destino
+	# Atribui cada extensão de arquivo a um destino.
+	# Caso exista uma extensão não listada, aparece uma mensagem na tela dizendo que o arquivo em questão foi ignorado pelo script.
 	case "${arquivo,,}" in
 		*.jpg|*.jpeg|*.webp) destino="${pastas[imagens]}" ;;
 		*.png)               destino="${pastas[pngs]}" ;;
@@ -63,8 +64,9 @@ for arquivo in "$DIRETORIO"/*; do
 			;;
 	esac
 
-	# Move cada arquivo para seu destino atribuído
+	# Move cada arquivo para seu destino atribuído.
 	mv -- "$arquivo" "$destino/"
 done
 
+# Ao mover todos os arquivos, exibe uma mensagem para o usuário.
 printf "Arquivos Movidos com Sucesso!"
