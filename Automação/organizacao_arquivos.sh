@@ -57,6 +57,10 @@ for arquivo in "$DIRETORIO"/*; do
 		*.cpp)               destino="${pastas[cpp]}" ;;
 		*.cs)                destino="${pastas[csharp]}" ;;
 		*.java)              destino="${pastas[java]}" ;;
+		*)
+			printf 'Extensão não listada; ignorando:  %s\n' "{$arquivo##*/}"
+			continue
+			;;
 	esac
 
 	# Move cada arquivo para seu destino atribuído
