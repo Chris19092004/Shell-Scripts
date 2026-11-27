@@ -45,6 +45,7 @@ for arquivo in "$DIRETORIO"/*; do
 
 	# Atribui cada extensão de arquivo a um destino.
 	# Caso exista uma extensão não listada, aparece uma mensagem na tela dizendo que o arquivo em questão foi ignorado pelo script.
+	# Duas vírgulas são usadas em 'case "${arquivo,,}"' para converter todo o nome do arquivo para lower case, caso exista um arquivo chamado "ARQUIVO.PDF", por exemplo.
 	case "${arquivo,,}" in
 		*.jpg|*.jpeg|*.webp) destino="${pastas[imagens]}" ;;
 		*.png)               destino="${pastas[pngs]}" ;;
