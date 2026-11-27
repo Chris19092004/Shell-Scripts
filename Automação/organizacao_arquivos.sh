@@ -2,65 +2,65 @@
 
 set -euo pipefail
 
-cd ~/Downloads
+# Cria a variável $DIRETORIO, que se não for definida, receberá como valor o diretório ~/Downloads
+# O diretório a ser organizado pode ser alterada na hora da execução com o comando abaixo:
+# ./organizacao_arquivos.sh [diretório desejado]
+DIRETORIO="${1:-/home/chris/Downloads}"
 
-mkdir -p ~/Pictures/Imagens
-mkdir -p ~/Pictures/PNGs
-mkdir -p ~/Pictures/GIFs
+# Muda para o diretório definido em $DIRETORIO
+cd "$DIRETORIO"
 
-mkdir -p ~/Videos/Vídeos
-mkdir -p ~/Music/Áudios
+# Declara os diretórios para onde os arquivos serão movidos em um array e atribui a cada elemento o diretório de destino
+declare -A pastas=(
+	[imagens]="$HOME/Pictures/Imagens"
+	[pngs]="$HOME/Pictures/PNGs"
+	[gifs]="$HOME/Pictures/GIFs"
 
-mkdir -p ~/Documents/Livros
+	[videos]="$HOME/Videos/Vídeos"
+	[audios]="$HOME/Music/Áudios"
 
-mkdir -p ~/Projects/'Shell Scripts'
-mkdir -p ~/Projects/Coding/Python
-mkdir -p ~/Projects/Coding/C
-mkdir -p ~/Projects/Coding/C++
-mkdir -p ~/Projects/Coding/C#
-mkdir -p ~/Projects/Coding/Java
+	[livros]="$HOME/Documents/Livros"
 
-for i in ~/Downloads/*; do
-	if [[ -f "$i" && "$i" == *.jpg || "$i" == *.jpeg || "$i" == *.webp ]]; then
-		mv "$i" ~/Pictures/Imagens
+	[scripts]="$HOME/Projects/Scripts"
 
-	elif [[ -f "$i" && "$i" == *.png ]]; then
-		mv "$i" ~/Pictures/PNGs
+	[python]="$HOME/Projects/Coding/Python"
+	[c]="$HOME/Projects/Coding/C"
+	[cpp]="$HOME/Projects/Coding/C++"
+	[csharp]="$HOME/Projects/Coding/C#"
+	[java]="$HOME/Projects/Coding/Java"
+)
 
-	elif [[ -f "$i" && "$i" == *.gif ]]; then
-		mv "$i" ~/Pictures/GIFs
-
-
-	elif [[ -f "$i" && "$i" == *.mp4 || "$i" == *.mkv ]]; then
-		mv "$i" ~/Videos/Vídeos
-
-
-	elif [[ -f "$i" && "$i" == *.mp3 ]]; then
-		mv "$i" ~/Music/Áudios
-
-	elif [[ -f "$i" && "$i" == *.pdf ]]; then
-		mv "$i" ~/Documents/Livros
-
-	
-	elif [[ -f "$i" && "$i" == *.sh ]]; then
-		mv "$i" ~/Projects/'Shell Scripts'
-
-	elif [[ -f "$i" && "$i" == *.py ]]; then
-		mv "$i" ~/Projects/Coding/Python
-
-	elif [[ -f "$i" && "$i" == *.c ]]; then
-		mv "$i" ~/Projects/Coding/C
-
-	elif [[ -f "$i" && "$i" == *.cpp ]]; then
-		mv "$i" ~/Projects/Coding/C++
-
-	elif [[ -f "$i" && "$i" == *.cs ]]; then
-		mv "$i" ~/Projects/Coding/'C#'
-
-	elif [[ "$i" && "$i" == *.java ]]; then
-	      mv "$i" ~/Projects/Coding/Java	
-
-	fi
+# Efetivamente cria os diretórios, usando o laço for que percorre cada elemento do array
+for destino in "${pastas[@]}"; do
+	mkdir -p "${destino/#\~/$DIRETORIO}"
 done
 
-printf "\nArquivos movidos com sucesso!"
+# Muda temporáriamente o comportamento do asterisco (*), para evitar conflitos em casos de diretórios vazios, por exemplo
+shopt -s nullglob
+
+# Laço for que percorre TODOS os arquivos dentro do diretório definido em $DIRETORIO;
+# Ele verifica se o arquivo atual é de fato um arquivo (e não um diretório, por exemplo "~/Arquivos.txt/") antes de continuar
+for arquivo in "$DIRETORIO"/*; do
+	[[ -f "$arquivo" ]] || continue
+
+	# Atribui cada extensão de arquivo a um destino
+	case "${arquivo,,}" in
+		*.jpg|*.jpeg|*.webp) destino="${pastas[imagens]}" ;;
+		*.png)               destino="${pastas[pngs]}" ;;
+		*.gif)               destino="${pastas[gifs]}" ;;
+		*.mp4|*.mkv)         destino="${pastas[videos]}" ;;
+		*.mp3)               destino="${pastas[audios]}" ;;
+		*.pdf)               destino="${pastas[livros]}" ;;
+		*.sh)                destino="${pastas[scripts]}" ;;
+		*.py)                destino="${pastas[python]}" ;;
+		*.c)                 destino="${pastas[c]}" ;;
+		*.cpp)               destino="${pastas[cpp]}" ;;
+		*.cs)                destino="${pastas[csharp]}" ;;
+		*.java)              destino="${pastas[java]}" ;;
+	esac
+
+	# Move cada arquivo para seu destino atribuído
+	mv -- "$arquivo" "$destino/"
+done
+
+printf "Arquivos Movidos com Sucesso!"
